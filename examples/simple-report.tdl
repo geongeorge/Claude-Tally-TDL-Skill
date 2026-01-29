@@ -1,0 +1,83 @@
+;; ============================================
+;; Simple Report Example
+;; Displays a list of ledgers with balances
+;; ============================================
+
+;; Add menu item to Gateway of Tally
+[#Menu: Gateway of Tally]
+  Add: Key Item: Ledger Summary: L: Display: LedgerSummaryReport
+
+;; Report Definition
+[Report: LedgerSummaryReport]
+  Form: LSRForm
+  Title: "Ledger Summary Report"
+
+;; Form Definition
+[Form: LSRForm]
+  Part: LSRHeaderPart
+  Part: LSRDetailPart
+  Part: LSRFooterPart
+
+;; Header Part
+[Part: LSRHeaderPart]
+  Line: LSRHeaderLine
+  Height: 3
+
+[Line: LSRHeaderLine]
+  Field: LSRTitle
+  Field: LSRDate
+
+[Field: LSRTitle]
+  Set as: "LEDGER SUMMARY"
+  Width: 50
+  Bold: Yes
+  Align: Left
+
+[Field: LSRDate]
+  Set as: $$MachineDate
+  Width: 30
+  Align: Right
+
+;; Detail Part - Repeating for each ledger
+[Part: LSRDetailPart]
+  Line: LSRDetailLine
+  Repeat: LSRDetailLine: LedgerCollection
+
+[Line: LSRDetailLine]
+  Field: LSRLedgerName
+  Field: LSROpeningBal
+  Field: LSRClosingBal
+
+[Field: LSRLedgerName]
+  Set as: $Name
+  Width: 40
+
+[Field: LSROpeningBal]
+  Set as: $OpeningBalance
+  Width: 20
+  Format: "##,##0.00"
+  Align: Right
+
+[Field: LSRClosingBal]
+  Set as: $ClosingBalance
+  Width: 20
+  Format: "##,##0.00"
+  Align: Right
+
+;; Collection to fetch ledgers
+[Collection: LedgerCollection]
+  Type: Ledger
+  Fetch: Name, OpeningBalance, ClosingBalance
+
+;; Footer Part
+[Part: LSRFooterPart]
+  Line: LSRFooterLine
+  Height: 2
+
+[Line: LSRFooterLine]
+  Field: LSRFooterText
+
+[Field: LSRFooterText]
+  Set as: "--- End of Report ---"
+  Width: 80
+  Align: Center

@@ -1,0 +1,93 @@
+;; ============================================
+;; API Integration Example
+;; Fetches data from external REST API
+;; ============================================
+
+;; Global formulas for configuration
+[System: Formula]
+  APIBaseURL: "https://api.example.com"
+  APITimeout: 30000
+
+;; Add menu item
+[#Menu: Gateway of Tally]
+  Add: Key Item: External Data: E: Display: ExternalDataReport
+
+;; Report Definition
+[Report: ExternalDataReport]
+  Form: EDRForm
+  Title: "External Data Report"
+
+[Form: EDRForm]
+  Part: EDRPart
+
+[Part: EDRPart]
+  Line: EDRLine
+  Repeat: EDRLine: ExternalAPICollection
+
+[Line: EDRLine]
+  Field: EDRCode
+  Field: EDRName
+  Field: EDRValue
+
+;; Fields with JSON tag mapping
+[Field: EDRCode]
+  Set as: $Code
+  JSON Tag: "code"
+  Width: 15
+
+[Field: EDRName]
+  Set as: $Name
+  JSON Tag: "name"
+  Width: 40
+
+[Field: EDRValue]
+  Set as: $Value
+  JSON Tag: "value"
+  Width: 20
+  Format: "##,##0.00"
+  Align: Right
+
+;; Collection fetching from HTTP JSON API
+[Collection: ExternalAPICollection]
+  DataSource: HTTPJSONEX
+  Remote URL: @@APIBaseURL + "/data"
+  JSON Object: "Item"
+  JSON Object Path: "$.response.items"
+
+;; ============================================
+;; Alternative: POST Request Example
+;; ============================================
+
+[Function: PostDataToAPI]
+  100 : HTTPRequest : @@APIBaseURL + "/submit" : POST : JSON : ASCII : RequestReport : HandleResponse
+
+[Function: HandleResponse]
+  Variable: vStatus: Number
+
+  001 : Walk Collection: Parameter Collection
+  002 :   Set: vStatus: $Status
+  003 : End Walk
+
+  004 : If: ##vStatus = 1
+  005 :   Msg Box: "Success": "Data submitted successfully"
+  006 : Else
+  007 :   Msg Box: "Error": "Failed to submit data"
+  008 : End If
+
+[Report: RequestReport]
+  Form: RequestForm
+  Export: Yes
+  Plain JSON: Yes
+
+[Form: RequestForm]
+  Part: RequestPart
+
+[Part: RequestPart]
+  Line: RequestLine
+
+[Line: RequestLine]
+  Field: RequestData
+
+[Field: RequestData]
+  Set as: ##SubmitData
+  JSON Tag: "data"

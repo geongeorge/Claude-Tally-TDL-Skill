@@ -1,0 +1,163 @@
+;; ============================================
+;; Custom Voucher Report Example
+;; Shows sales vouchers with conditional formatting
+;; ============================================
+
+;; System formulas
+[System: Formula]
+  HighValueThreshold: 100000
+  ReportWidth: 100
+
+;; Add to Reports menu
+[#Menu: Display]
+  Add: Key Item: Sales Analysis: S: Display: SalesAnalysisReport
+
+;; Main Report
+[Report: SalesAnalysisReport]
+  Form: SARForm
+  Title: "Sales Analysis Report"
+  Variable: FromDate, ToDate
+
+;; Variables for date range
+[Variable: FromDate]
+  Type: Date
+
+[Variable: ToDate]
+  Type: Date
+
+;; Form
+[Form: SARForm]
+  Part: SARHeaderPart
+  Part: SARFilterPart
+  Part: SARDetailPart
+  Part: SARTotalPart
+
+;; Header
+[Part: SARHeaderPart]
+  Line: SARTitleLine
+  Height: 4
+
+[Line: SARTitleLine]
+  Field: SARTitle
+
+[Field: SARTitle]
+  Set as: "SALES ANALYSIS REPORT"
+  Width: @@ReportWidth
+  Bold: Yes
+  Align: Center
+  Background: Blue
+  Color: White
+
+;; Filter display
+[Part: SARFilterPart]
+  Line: SARFilterLine
+  Height: 2
+
+[Line: SARFilterLine]
+  Field: SARDateRange
+
+[Field: SARDateRange]
+  DateFrom: ##FromDate
+  DateTo: ##ToDate
+  Set as: "Period: " + @DateFrom + " to " + @DateTo
+  Width: @@ReportWidth
+  Align: Center
+  Italic: Yes
+
+;; Detail Part
+[Part: SARDetailPart]
+  Line: SARColumnHeader
+  Line: SARDetailLine
+  Repeat: SARDetailLine: SalesVoucherCollection
+
+;; Column Headers
+[Line: SARColumnHeader]
+  Field: SARHdrDate, SARHdrParty, SARHdrAmount, SARHdrStatus
+
+[Field: SARHdrDate]
+  Set as: "Date"
+  Width: 15
+  Bold: Yes
+  Underline: Yes
+
+[Field: SARHdrParty]
+  Set as: "Party Name"
+  Width: 40
+  Bold: Yes
+  Underline: Yes
+
+[Field: SARHdrAmount]
+  Set as: "Amount"
+  Width: 20
+  Bold: Yes
+  Underline: Yes
+  Align: Right
+
+[Field: SARHdrStatus]
+  Set as: "Status"
+  Width: 15
+  Bold: Yes
+  Underline: Yes
+  Align: Center
+
+;; Detail Line
+[Line: SARDetailLine]
+  Field: SARVchDate, SARPartyName, SARAmount, SARStatus
+
+[Field: SARVchDate]
+  Set as: $Date
+  Width: 15
+  Format: "dd-MMM-yyyy"
+
+[Field: SARPartyName]
+  Set as: $PartyLedgerName
+  Width: 40
+
+[Field: SARAmount]
+  Set as: $Amount
+  Width: 20
+  Format: "##,##0.00"
+  Align: Right
+  ;; Highlight high-value transactions
+  Color: if $Amount > @@HighValueThreshold then Red else Black
+  Bold: if $Amount > @@HighValueThreshold then Yes else No
+
+[Field: SARStatus]
+  ;; Conditional status display
+  Set as: if $$IsDr:$Amount then "Debit" else "Credit"
+  Width: 15
+  Align: Center
+  Color: if $$IsDr:$Amount then Red else Green
+
+;; Collection for sales vouchers
+[Collection: SalesVoucherCollection]
+  Type: Voucher
+  Child Of: $$VchTypeSales
+  Filter: DateRangeFilter
+  Fetch: Date, PartyLedgerName, Amount
+
+;; Date range filter
+[System: Formula]
+  DateRangeFilter: $Date >= ##FromDate AND $Date <= ##ToDate
+
+;; Totals Part
+[Part: SARTotalPart]
+  Line: SARTotalLine
+  Height: 3
+
+[Line: SARTotalLine]
+  Field: SARTotalLabel, SARTotalAmount
+
+[Field: SARTotalLabel]
+  Set as: "TOTAL SALES:"
+  Width: 55
+  Bold: Yes
+  Align: Right
+
+[Field: SARTotalAmount]
+  Set as: $$Total:Amount:SalesVoucherCollection
+  Width: 20
+  Format: "##,##0.00"
+  Align: Right
+  Bold: Yes
+  Color: Blue
