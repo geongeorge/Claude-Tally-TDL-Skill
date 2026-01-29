@@ -18,7 +18,7 @@ Tally Definition Language (TDL) is a definition-based language developed by Tall
 
 ```bash
 mkdir -p ~/.claude/skills
-git clone https://github.com/YOUR_USERNAME/tally-tdl-skill.git ~/.claude/skills/tally-tdl-skill
+git clone https://github.com/geongeorge/Claude-Tally-TDL-Skill.git ~/.claude/skills/tdl
 ```
 
 ### Option 2: Project Skill (Available only in a specific project)
@@ -26,7 +26,7 @@ git clone https://github.com/YOUR_USERNAME/tally-tdl-skill.git ~/.claude/skills/
 ```bash
 cd your-project
 mkdir -p .claude/skills
-git clone https://github.com/YOUR_USERNAME/tally-tdl-skill.git .claude/skills/tally-tdl-skill
+git clone https://github.com/geongeorge/Claude-Tally-TDL-Skill.git .claude/skills/tdl
 ```
 
 ## Usage
